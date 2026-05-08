@@ -100,7 +100,7 @@ exports.sendOtp = async (req, res) => {
   
       res.json({
         success: true,
-        message: "OTP sent Successfuly",
+        message: "Login OTP sent Successfuly",
         otp // 🔥 testing ke liye (remove later)
       });
   
