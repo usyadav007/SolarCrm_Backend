@@ -15,5 +15,6 @@ router.get("/attendance-excel", auth, controller.attendanceReport);
 router.get("/salary-excel", auth, controller.salaryReport);
 router.get("/installation-excel", auth, controller.installationReport);
 router.get("/service-excel", auth, controller.serviceReport);
+router.get("/lead-status",auth,controller.leadStatusAnalytics);
 
 module.exports = router;

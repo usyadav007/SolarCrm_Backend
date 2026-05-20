@@ -96,21 +96,82 @@ exports.staffPerformance = async (req, res) => {
   // MONTHLY REVENUE
 
   exports.monthlyRevenue = async (req, res) => {
+
     try {
-      const data = await Invoice.findAll({
-        attributes: [
-          [Sequelize.fn("MONTH", Sequelize.col("created_at")), "month"],
-          [Sequelize.fn("SUM", Sequelize.col("total_amount")), "revenue"]
-        ],
-        group: ["month"]
-      });
   
-      return successResponse(res, {data }, "Fetch Data successful");
+      const [data] = await Invoice.sequelize.query(`
+        
+        SELECT 
+          MONTHNAME(created_at) AS month,
+          SUM(total_amount) AS revenue
+        FROM invoices
+        GROUP BY 
+          MONTH(created_at),
+          MONTHNAME(created_at)
+        ORDER BY MONTH(created_at) ASC
+  
+      `);
+  
+      return successResponse(
+        res,
+        { data },
+        "Fetch Data successful"
+      );
   
     } catch (err) {
-      return errorResponse(res, "Fetch data failed", err.message);
+  
+      return errorResponse(
+        res,
+        "Fetch data failed",
+        err.message
+      );
+  
     }
+  
   };
+
+
+
+
+
+
+// Lead Status Anlysis 
+
+exports.leadStatusAnalytics = async (req, res) => {
+  try {
+
+    const data = await Lead.findAll({
+      attributes: [
+        "status",
+        [
+          Sequelize.fn(
+            "COUNT",
+            Sequelize.col("status")
+          ),
+          "count"
+        ]
+      ],
+
+      group: ["status"]
+    });
+
+    return successResponse(
+      res,
+      data,
+      "Lead status analytics fetched"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Failed to fetch lead status analytics",
+      err.message
+    );
+  }
+};
+
+
 
   // Staff Performance
 
