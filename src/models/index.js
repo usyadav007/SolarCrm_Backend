@@ -17,6 +17,7 @@ const Product = require("./productModel")(sequelize, require("sequelize").DataTy
 const Inventory = require("./inventoryModel")(sequelize, require("sequelize").DataTypes);
 const Otp = require("./otpModel")(sequelize, require("sequelize").DataTypes);
 const Customer = require("./customerModel")(sequelize, require("sequelize").DataTypes);
+const Role = require("./roleModel")(sequelize, require("sequelize").DataTypes);
 
 // ✅ RELATIONS
 
@@ -119,6 +120,18 @@ Lead.hasMany(Invoice, { foreignKey: "lead_id" });
 Lead.belongsTo(Customer, { foreignKey: "customer_id" });
 Customer.hasMany(Lead, { foreignKey: "customer_id" });
 
+// Role → Staff
+
+Role.hasMany(Staff, {
+  foreignKey: "role_id"
+});
+
+Staff.belongsTo(Role, {
+  foreignKey: "role_id",
+  as: "roleData"
+});
+
+
 
 
 const db = {};
@@ -141,6 +154,7 @@ db.Product = Product;
 db.Inventory = Inventory;
 db.Otp = Otp;
 db.Customer = Customer;
+db.Role = Role;
 
 
 module.exports = db;

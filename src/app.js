@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const leadRoutes = require("./routes/leadRoutes");
 const followupRoutes = require("./routes/followupRoutes");
+const roleRoutes = require("./routes/roleRoutes");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/followups", followupRoutes);
+app.use("/api/roles", roleRoutes);
 
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/surveys", require("./routes/surveyRoutes"));
@@ -34,5 +36,6 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/inventory", require("./routes/inventoryRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/customer", require("./routes/customerRoutes"));
+
 
 module.exports = app;
