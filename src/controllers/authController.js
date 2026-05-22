@@ -137,16 +137,22 @@ exports.login = async (req, res) => {
 
       {
         id: user.id,
-        role_id: user.role_id
+    
+        role_id:
+          user.role_id,
+    
+        role_name:
+          user.roleData?.name
       },
-
+    
       process.env.JWT_SECRET,
-
+    
       {
         expiresIn: "7d"
       }
-
+    
     );
+
 
     // REMOVE PASSWORD
 
