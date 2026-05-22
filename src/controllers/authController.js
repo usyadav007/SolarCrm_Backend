@@ -278,16 +278,36 @@ exports.updateUser = async (req, res) => {
     const {
       name,
       email,
+      password,
       role_id
     } = req.body;
 
+    // UPDATE OBJECT
+
+    const updateData = {
+
+      name,
+      email,
+      role_id
+
+    };
+
+    // HASH PASSWORD IF PROVIDED
+
+    if (password) {
+
+      updateData.password =
+        await bcrypt.hash(
+          password,
+          10
+        );
+    }
+
+    // UPDATE USER
+
     await Staff.update(
 
-      {
-        name,
-        email,
-        role_id
-      },
+      updateData,
 
       {
         where: {
