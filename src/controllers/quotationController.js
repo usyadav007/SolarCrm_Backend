@@ -38,24 +38,52 @@ exports.create = async (req, res) => {
 
 // GET ALL
 exports.getAll = async (req, res) => {
-    try {
-      const { lead_id, status } = req.query;
-  
-      let where = {};
-      if (lead_id) where.lead_id = lead_id;
-      if (status) where.status = status;
-  
-      const allQuotation = await Quotation.findAll({
-        where,
-        order: [["id", "DESC"]]
-      });
-      return successResponse(res, {allQuotation}, "Fetch Data successful");
-  
-    } catch (err) {
-      
-      return errorResponse(res, "Fetch Data failed", err.message);
+  try {
+
+    const { lead_id, status } = req.query;
+
+    let where = {};
+
+    if (lead_id) {
+      where.lead_id = lead_id;
     }
-  };
+
+    if (status) {
+      where.status = status;
+    }
+
+    const allQuotation = await Quotation.findAll({
+      where,
+
+      include: [
+        {
+          model: Lead,
+          attributes: [
+            "id",
+            "customer_name",
+            "phone"
+          ]
+        }
+      ],
+
+      order: [["id", "DESC"]]
+    });
+
+    return successResponse(
+      res,
+      { allQuotation },
+      "Fetch Data successful"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Fetch Data failed",
+      err.message
+    );
+  }
+};
   
   // GET ONE
   exports.getOne = async (req, res) => {

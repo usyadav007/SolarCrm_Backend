@@ -120,6 +120,14 @@ Lead.hasMany(Invoice, { foreignKey: "lead_id" });
 Lead.belongsTo(Customer, { foreignKey: "customer_id" });
 Customer.hasMany(Lead, { foreignKey: "customer_id" });
 
+Lead.hasMany(Quotation, {
+  foreignKey: "lead_id"
+});
+
+Quotation.belongsTo(Lead, {
+  foreignKey: "lead_id"
+});
+
 // Role → Staff
 
 Role.hasMany(Staff, {
