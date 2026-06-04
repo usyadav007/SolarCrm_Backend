@@ -19,130 +19,291 @@ const Otp = require("./otpModel")(sequelize, require("sequelize").DataTypes);
 const Customer = require("./customerModel")(sequelize, require("sequelize").DataTypes);
 const Role = require("./roleModel")(sequelize, require("sequelize").DataTypes);
 
-// ✅ RELATIONS
 
-// Lead → History
+// ==========================================
+// LEAD HISTORY
+// ==========================================
+
 Lead.hasMany(LeadHistory, {
-  foreignKey: "lead_id"
+  foreignKey: "lead_id",
 });
 
 LeadHistory.belongsTo(Lead, {
-  foreignKey: "lead_id"
+  foreignKey: "lead_id",
 });
 
-// Staff → History (kisne action kiya)
-Staff.hasMany(LeadHistory, { foreignKey: "done_by" });
+Staff.hasMany(LeadHistory, {
+  foreignKey: "done_by",
+});
 
-LeadHistory.belongsTo(Staff, { foreignKey: "done_by" });
+LeadHistory.belongsTo(Staff, {
+  foreignKey: "done_by",
+});
 
-// Optional (VERY USEFUL)
-Lead.belongsTo(Staff, { foreignKey: "assigned_to", as: "assignedUser" });
 
-// RELATIONS
-Lead.hasMany(FollowUp, { foreignKey: "lead_id" });
-FollowUp.belongsTo(Lead, { foreignKey: "lead_id" });
+// ==========================================
+// LEAD ASSIGNED USER
+// ==========================================
 
-Staff.hasMany(FollowUp, { foreignKey: "user_id" });
-FollowUp.belongsTo(Staff, { foreignKey: "user_id" });
+Lead.belongsTo(Staff, {
+  foreignKey: "assigned_to",
+  as: "assignedUser",
+});
 
-// Relations
-Lead.hasMany(Survey, { foreignKey: "lead_id" });
-Survey.belongsTo(Lead, { foreignKey: "lead_id" });
 
-Staff.hasMany(Survey, { foreignKey: "engineer_id" });
-Survey.belongsTo(Staff, { foreignKey: "engineer_id" });
+// ==========================================
+// FOLLOWUPS
+// ==========================================
 
-// Relations
-Lead.hasMany(Quotation, { foreignKey: "lead_id" });
-Quotation.belongsTo(Lead, { foreignKey: "lead_id" });
+Lead.hasMany(FollowUp, {
+  foreignKey: "lead_id",
+});
 
-Survey.hasMany(Quotation, { foreignKey: "survey_id" });
-Quotation.belongsTo(Survey, { foreignKey: "survey_id" });
+FollowUp.belongsTo(Lead, {
+  foreignKey: "lead_id",
+  as: "Lead",
+});
 
-// Relations
-Lead.hasMany(Installation, { foreignKey: "lead_id" });
-Installation.belongsTo(Lead, { foreignKey: "lead_id" });
+Staff.hasMany(FollowUp, {
+  foreignKey: "user_id",
+});
 
-Quotation.hasMany(Installation, { foreignKey: "quotation_id" });
-Installation.belongsTo(Quotation, { foreignKey: "quotation_id" });
+FollowUp.belongsTo(Staff, {
+  foreignKey: "user_id",
+  as: "User",
+});
 
-Staff.hasMany(Installation, { foreignKey: "technician_id" });
-Installation.belongsTo(Staff, { foreignKey: "technician_id" });
 
-// Relations
-Lead.hasMany(Service, { foreignKey: "lead_id" });
-Service.belongsTo(Lead, { foreignKey: "lead_id" });
+// ==========================================
+// SURVEYS
+// ==========================================
 
-Installation.hasMany(Service, { foreignKey: "installation_id" });
-Service.belongsTo(Installation, { foreignKey: "installation_id" });
+Lead.hasMany(Survey, {
+  foreignKey: "lead_id",
+});
 
-Staff.hasMany(Service, { foreignKey: "technician_id" });
-Service.belongsTo(Staff, { foreignKey: "technician_id" });
+Survey.belongsTo(Lead, {
+  foreignKey: "lead_id",
+  as: "Lead",
+});
 
-// Relations
-Lead.hasMany(Invoice, { foreignKey: "lead_id" });
-Invoice.belongsTo(Lead, { foreignKey: "lead_id" });
+Staff.hasMany(Survey, {
+  foreignKey: "engineer_id",
+});
 
-Installation.hasMany(Invoice, { foreignKey: "installation_id" });
-Invoice.belongsTo(Installation, { foreignKey: "installation_id" });
+Survey.belongsTo(Staff, {
+  foreignKey: "engineer_id",
+  as: "Engineer",
+});
 
-Invoice.hasMany(Payment, { foreignKey: "invoice_id" });
-Payment.belongsTo(Invoice, { foreignKey: "invoice_id" });
 
-// Relation
-Staff.hasMany(Attendance, { foreignKey: "staff_id" });
-Attendance.belongsTo(Staff, { foreignKey: "staff_id" });
-
-Staff.hasMany(Salary, { foreignKey: "staff_id" });
-Salary.belongsTo(Staff, { foreignKey: "staff_id" });
-
-// Relations
-Lead.hasMany(Document, { foreignKey: "lead_id" });
-Document.belongsTo(Lead, { foreignKey: "lead_id" });
-
-Installation.hasMany(Document, { foreignKey: "installation_id" });
-Document.belongsTo(Installation, { foreignKey: "installation_id" });
-
-Product.hasMany(Inventory, { foreignKey: "product_id" });
-Inventory.belongsTo(Product, { foreignKey: "product_id" });
-
-Customer.hasMany(Lead, { foreignKey: "customer_id" });
-Lead.belongsTo(Customer, { foreignKey: "customer_id" });
-
-Invoice.belongsTo(Lead, { foreignKey: "lead_id" });
-Lead.hasMany(Invoice, { foreignKey: "lead_id" });
-
-// Invoice → Lead
-Invoice.belongsTo(Lead, { foreignKey: "lead_id" });
-Lead.hasMany(Invoice, { foreignKey: "lead_id" });
-
-// Lead → Customer
-Lead.belongsTo(Customer, { foreignKey: "customer_id" });
-Customer.hasMany(Lead, { foreignKey: "customer_id" });
+// ==========================================
+// QUOTATIONS
+// ==========================================
 
 Lead.hasMany(Quotation, {
-  foreignKey: "lead_id"
+  foreignKey: "lead_id",
 });
 
 Quotation.belongsTo(Lead, {
-  foreignKey: "lead_id"
+  foreignKey: "lead_id",
+  as: "Lead",
 });
 
-// Role → Staff
+Survey.hasMany(Quotation, {
+  foreignKey: "survey_id",
+});
+
+Quotation.belongsTo(Survey, {
+  foreignKey: "survey_id",
+  as: "Survey",
+});
+
+
+// ==========================================
+// INSTALLATIONS
+// ==========================================
+
+Lead.hasMany(Installation, {
+  foreignKey: "lead_id",
+});
+
+Installation.belongsTo(Lead, {
+  foreignKey: "lead_id",
+  as: "Lead",
+});
+
+Quotation.hasMany(Installation, {
+  foreignKey: "quotation_id",
+});
+
+Installation.belongsTo(Quotation, {
+  foreignKey: "quotation_id",
+  as: "Quotation",
+});
+
+Staff.hasMany(Installation, {
+  foreignKey: "technician_id",
+});
+
+Installation.belongsTo(Staff, {
+  foreignKey: "technician_id",
+  as: "Technician",
+});
+
+
+// ==========================================
+// SERVICES
+// ==========================================
+
+Lead.hasMany(Service, {
+  foreignKey: "lead_id",
+});
+
+Service.belongsTo(Lead, {
+  foreignKey: "lead_id",
+  as: "Lead",
+});
+
+Installation.hasMany(Service, {
+  foreignKey: "installation_id",
+});
+
+Service.belongsTo(Installation, {
+  foreignKey: "installation_id",
+  as: "Installation",
+});
+
+Staff.hasMany(Service, {
+  foreignKey: "technician_id",
+});
+
+Service.belongsTo(Staff, {
+  foreignKey: "technician_id",
+  as: "Technician",
+});
+
+
+// ==========================================
+// INVOICES
+// ==========================================
+
+Lead.hasMany(Invoice, {
+  foreignKey: "lead_id",
+});
+
+Invoice.belongsTo(Lead, {
+  foreignKey: "lead_id",
+  as: "Lead",
+});
+
+Installation.hasMany(Invoice, {
+  foreignKey: "installation_id",
+});
+
+Invoice.belongsTo(Installation, {
+  foreignKey: "installation_id",
+  as: "Installation",
+});
+
+Invoice.hasMany(Payment, {
+  foreignKey: "invoice_id",
+});
+
+Payment.belongsTo(Invoice, {
+  foreignKey: "invoice_id",
+});
+
+
+// ==========================================
+// HR MODULE
+// ==========================================
+
+Staff.hasMany(Attendance, {
+  foreignKey: "staff_id",
+});
+
+Attendance.belongsTo(Staff, {
+  foreignKey: "staff_id",
+});
+
+Staff.hasMany(Salary, {
+  foreignKey: "staff_id",
+});
+
+Salary.belongsTo(Staff, {
+  foreignKey: "staff_id",
+});
+
+
+// ==========================================
+// DOCUMENTS
+// ==========================================
+
+Lead.hasMany(Document, {
+  foreignKey: "lead_id",
+});
+
+Document.belongsTo(Lead, {
+  foreignKey: "lead_id",
+});
+
+Installation.hasMany(Document, {
+  foreignKey: "installation_id",
+});
+
+Document.belongsTo(Installation, {
+  foreignKey: "installation_id",
+});
+
+
+// ==========================================
+// INVENTORY
+// ==========================================
+
+Product.hasMany(Inventory, {
+  foreignKey: "product_id",
+});
+
+Inventory.belongsTo(Product, {
+  foreignKey: "product_id",
+});
+
+
+// ==========================================
+// CUSTOMERS
+// ==========================================
+
+Customer.hasMany(Lead, {
+  foreignKey: "customer_id",
+});
+
+Lead.belongsTo(Customer, {
+  foreignKey: "customer_id",
+  as: "Customer",
+});
+
+
+// ==========================================
+// ROLES
+// ==========================================
 
 Role.hasMany(Staff, {
-  foreignKey: "role_id"
+  foreignKey: "role_id",
 });
 
 Staff.belongsTo(Role, {
   foreignKey: "role_id",
-  as: "roleData"
+  as: "roleData",
 });
 
 
-
+// ==========================================
+// EXPORTS
+// ==========================================
 
 const db = {};
+
 db.sequelize = sequelize;
 
 db.Lead = Lead;
@@ -163,6 +324,5 @@ db.Inventory = Inventory;
 db.Otp = Otp;
 db.Customer = Customer;
 db.Role = Role;
-
 
 module.exports = db;
