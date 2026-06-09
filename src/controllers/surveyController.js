@@ -56,53 +56,162 @@ exports.update = async (req, res) => {
   // Get Survey by Filter 
 
   exports.getAll = async (req, res) => {
+
     try {
-      const { lead_id, engineer_id, location, status } = req.query;
+  
+      const {
+        lead_id,
+        engineer_id,
+        location,
+        status
+      } = req.query;
   
       let where = {};
   
-      if (lead_id) where.lead_id = lead_id;
-      if (engineer_id) where.engineer_id = engineer_id;
-      if (status) where.status = status;
-  
-      if (location) {
-        where.location = {
-          [require("sequelize").Op.like]: `%${location}%`
-        };
+      if (lead_id) {
+        where.lead_id = lead_id;
       }
   
-      const allSurvey = await Survey.findAll({
-        where,
-        include: [
-          {
-            model: Lead,
-            attributes: ["id", "customer_name", "phone"]
-          }
-        ],
-        order: [["id", "DESC"]]
-      });
+      if (engineer_id) {
+        where.engineer_id = engineer_id;
+      }
   
-      return successResponse(res, {allSurvey}, "Fetch Survey Successful");
+      if (status) {
+        where.status = status;
+      }
+  
+      if (location) {
+  
+        where.location = {
+  
+          [require("sequelize").Op.like]:
+            `%${location}%`
+  
+        };
+  
+      }
+  
+      const allSurvey =
+        await Survey.findAll({
+  
+          where,
+  
+          include: [
+  
+            {
+              association: "Lead",
+  
+              attributes: [
+                "id",
+                "customer_name",
+                "phone"
+              ]
+            },
+  
+            {
+              association: "Engineer",
+  
+              attributes: [
+                "id",
+                "name",
+                "email"
+              ]
+            }
+  
+          ],
+  
+          order: [
+            ["id", "DESC"]
+          ]
+  
+        });
+  
+      return successResponse(
+        res,
+        { allSurvey },
+        "Fetch Survey Successful"
+      );
   
     } catch (err) {
-      return errorResponse(res, "Fetch Data failed", err.message);
+  
+      return errorResponse(
+        res,
+        "Fetch Data failed",
+        err.message
+      );
+  
     }
+  
   };
 
   // GET SINGLE SURVEY
 
   exports.getOne = async (req, res) => {
+
     try {
-      const singleSurvey = await Survey.findByPk(req.params.id);
+  
+      const singleSurvey =
+        await Survey.findByPk(
+  
+          req.params.id,
+  
+          {
+  
+            include: [
+  
+              {
+                association: "Lead",
+  
+                attributes: [
+                  "id",
+                  "customer_name",
+                  "phone"
+                ]
+              },
+  
+              {
+                association: "Engineer",
+  
+                attributes: [
+                  "id",
+                  "name",
+                  "email"
+                ]
+              }
+  
+            ]
+  
+          }
+  
+        );
   
       if (!singleSurvey) {
-        return errorResponse(res, "Data not found", null, 404);
+  
+        return errorResponse(
+          res,
+          "Data not found",
+          null,
+          404
+        );
+  
       }
-      return successResponse(res, {singleSurvey}, "Fetch Data successful");
+  
+      return successResponse(
+        res,
+        { singleSurvey },
+        "Fetch Data successful"
+      );
   
     } catch (err) {
-      return errorResponse(res, "Fetch Data failed", err.message);
+  
+      return errorResponse(
+        res,
+        "Fetch Data failed",
+        err.message
+      );
+  
     }
+  
   };
 
   // DELETE Survey 
