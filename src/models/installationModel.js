@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       install_date: DataTypes.DATE,
       technician_id: DataTypes.INTEGER,
       system_size: DataTypes.STRING,
+      materialUsed: DataTypes.STRING, 
       address: DataTypes.STRING,
       status: {
         type: DataTypes.STRING,
