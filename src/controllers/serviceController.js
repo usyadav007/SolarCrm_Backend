@@ -45,57 +45,170 @@ exports.update = async (req, res) => {
 
   const { Op } = require("sequelize");
 
-exports.getAll = async (req, res) => {
-  try {
-    const {
-      technician_id,
-      status,
-      priority,
-      lead_id,
-      installation_id,
-      from_date,
-      to_date
-    } = req.query;
-
-    let where = {};
-
-    if (technician_id) where.technician_id = technician_id;
-    if (status) where.status = status;
-    if (priority) where.priority = priority;
-    if (lead_id) where.lead_id = lead_id;
-    if (installation_id) where.installation_id = installation_id;
-
-    if (from_date && to_date) {
-      where.service_date = {
-        [Op.between]: [new Date(from_date), new Date(to_date)]
-      };
+  exports.getAll = async (req, res) => {
+    try {
+  
+      const {
+        technician_id,
+        status,
+        priority,
+        lead_id,
+        installation_id,
+        from_date,
+        to_date
+      } = req.query;
+  
+      let where = {};
+  
+      if (technician_id)
+        where.technician_id = technician_id;
+  
+      if (status)
+        where.status = status;
+  
+      if (priority)
+        where.priority = priority;
+  
+      if (lead_id)
+        where.lead_id = lead_id;
+  
+      if (installation_id)
+        where.installation_id = installation_id;
+  
+      if (from_date && to_date) {
+        where.service_date = {
+          [Op.between]: [
+            new Date(from_date),
+            new Date(to_date)
+          ]
+        };
+      }
+  
+      const allService =
+        await Service.findAll({
+  
+          where,
+  
+          include: [
+  
+            {
+              model: Lead,
+              as: "Lead",
+              attributes: [
+                "id",
+                "customer_name",
+                "phone"
+              ]
+            },
+  
+            {
+              model: Installation,
+              as: "Installation",
+              attributes: [
+                "id",
+                "system_size",
+                "status"
+              ]
+            },
+  
+            {
+              model: Staff,
+              as: "Technician",
+              attributes: [
+                "id",
+                "name",
+                "email"
+              ]
+            }
+  
+          ],
+  
+          order: [
+            ["id", "DESC"]
+          ]
+  
+        });
+  
+      return successResponse(
+        res,
+        { allService },
+        "Fetch Data successful"
+      );
+  
+    } catch (err) {
+  
+      return errorResponse(
+        res,
+        "Fetch data failed",
+        err.message
+      );
+  
     }
-
-    const allService = await Service.findAll({
-        where,
-        include: [
-          { model: Lead, attributes: ["id", "customer_name"] },
-          { model: Installation, attributes: ["id", "system_size"] },
-          { model: Staff, attributes: ["id", "name"] }
-        ],
-        order: [["id", "DESC"]]
-      });
-
-   
-    return successResponse(res, {allService }, "Fetch Data successful");
-
-
-  } catch (err) {
-    return errorResponse(res, "Fetch data failed", err.message);
-  }
-};
+  };
 
 // GET ONE
 
 exports.getOne = async (req, res) => {
-    const getOneService = await Service.findByPk(req.params.id);
-    return successResponse(res, {getOneService }, "Fetch Data successful");
-  };
+
+  try {
+
+    const getOneService =
+      await Service.findByPk(
+        req.params.id,
+        {
+          include: [
+
+            {
+              model: Lead,
+              as: "Lead",
+              attributes: [
+                "id",
+                "customer_name",
+                "phone"
+              ]
+            },
+
+            {
+              model: Installation,
+              as: "Installation",
+              attributes: [
+                "id",
+                "system_size",
+                "status"
+              ]
+            },
+
+            {
+              model: Staff,
+              as: "Technician",
+              attributes: [
+                "id",
+                "name",
+                "email"
+              ]
+            }
+
+          ]
+        }
+      );
+
+    return successResponse(
+      res,
+      { getOneService },
+      "Fetch Data successful"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Fetch data failed",
+      err.message
+    );
+
+  }
+
+};
 
   // DELETE
 
