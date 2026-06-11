@@ -1,15 +1,36 @@
-const express = require("express");
-const router = express.Router();
+const express =
+  require("express");
 
-const controller = require("../controllers/billingController");
-const auth = require("../middleware/authMiddleware");
+const router =
+  express.Router();
 
-router.post("/invoice", auth, controller.createInvoice);
-router.get("/invoice", auth, controller.getInvoices);
-router.delete("/invoice/:id", auth, controller.deleteInvoice);
+const controller =
+  require("../../controllers/invoiceController");
 
-router.post("/payment", auth, controller.addPayment);
-router.get("/payment/:invoice_id", auth, controller.getPayments);
-router.delete("/payment/:id", auth, controller.deletePayment);
+router.post(
+  "/",
+  controller.create
+);
 
-module.exports = router;
+router.get(
+  "/",
+  controller.getAll
+);
+
+router.get(
+  "/:id",
+  controller.getOne
+);
+
+router.put(
+  "/:id",
+  controller.update
+);
+
+router.delete(
+  "/:id",
+  controller.delete
+);
+
+module.exports =
+  router;

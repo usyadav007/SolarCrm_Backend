@@ -119,6 +119,52 @@ exports.addPayment = async (req, res) => {
   }
 };
 
+// Update Invoice 
+
+exports.update = async (req, res) => {
+
+  try {
+
+    const invoice =
+      await Invoice.findByPk(
+        req.params.id
+      );
+
+    if (!invoice) {
+
+      return errorResponse(
+        res,
+        "Invoice not found",
+        null,
+        404
+      );
+
+    }
+
+    await invoice.update(
+      req.body
+    );
+
+    return successResponse(
+      res,
+      { invoice },
+      "Invoice updated successfully"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Update failed",
+      err.message
+    );
+
+  }
+
+};
+
+
+
 
   // GET ALL INVOICES
 
@@ -151,6 +197,94 @@ exports.getInvoices = async (req, res) => {
     return errorResponse(res, "Fetch data failed", err.message);
   }
 };
+
+// FIND ONE INVOICE BY ID 
+
+
+exports.getOne = async (req, res) => {
+
+  try {
+
+    const invoice =
+      await Invoice.findByPk(
+        req.params.id
+      );
+
+    if (!invoice) {
+
+      return errorResponse(
+        res,
+        "Invoice not found",
+        null,
+        404
+      );
+
+    }
+
+    return successResponse(
+      res,
+      { invoice },
+      "Fetch Data successful"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Fetch failed",
+      err.message
+    );
+
+  }
+
+};
+
+
+/// DELETE A SINGLE INVOICE
+
+
+exports.delete = async (req, res) => {
+
+  try {
+
+    const invoice =
+      await Invoice.findByPk(
+        req.params.id
+      );
+
+    if (!invoice) {
+
+      return errorResponse(
+        res,
+        "Invoice not found",
+        null,
+        404
+      );
+
+    }
+
+    await invoice.destroy();
+
+    return successResponse(
+      res,
+      null,
+      "Invoice deleted successfully"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Delete failed",
+      err.message
+    );
+
+  }
+
+};
+
+
+
 
 // GET PAYMENTS BY INVOICE
 
