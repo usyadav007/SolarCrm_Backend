@@ -1,20 +1,18 @@
-const express =
-  require("express");
+const express = require("express");
 
-const router =
-  express.Router();
+const router = express.Router();
 
 const controller =
-  require("../controllers/billingController"); // ✅ Correct Path
+  require("../controllers/billingController");
 
 router.post(
   "/invoice",
-  controller.create
+  controller.createInvoice
 );
 
 router.get(
   "/invoice",
-  controller.getAll
+  controller.getInvoices
 );
 
 router.get(
@@ -32,5 +30,21 @@ router.delete(
   controller.delete
 );
 
-module.exports =
-  router;
+// Payment Routes
+
+router.post(
+  "/payment",
+  controller.addPayment
+);
+
+router.get(
+  "/payment/:invoice_id",
+  controller.getPayments
+);
+
+router.delete(
+  "/payment/:id",
+  controller.deletePayment
+);
+
+module.exports = router;
