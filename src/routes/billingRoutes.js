@@ -5,30 +5,30 @@ const router =
   express.Router();
 
 const controller =
-  require("../../controllers/invoiceController");
+  require("../controllers/billingController"); // ✅ Correct Path
 
 router.post(
-  "/",
+  "/invoice",
   controller.create
 );
 
 router.get(
-  "/",
+  "/invoice",
   controller.getAll
 );
 
 router.get(
-  "/:id",
+  "/invoice/:id",
   controller.getOne
 );
 
 router.put(
-  "/:id",
+  "/invoice/:id",
   controller.update
 );
 
 router.delete(
-  "/:id",
+  "/invoice/:id",
   controller.delete
 );
 
