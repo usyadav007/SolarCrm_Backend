@@ -184,6 +184,176 @@ exports.getAllPayments = async (req, res) => {
 };
 
 
+exports.getOnePayment = async (req, res) => {
+  try {
+
+    const payment = await Payment.findByPk(
+      req.params.id,
+      {
+        include: [
+          {
+            model: Invoice,
+            include: [
+              {
+                model: Lead,
+                as: "Lead",
+                attributes: [
+                  "id",
+                  "customer_name",
+                  "phone"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    );
+
+    if (!payment) {
+
+      return errorResponse(
+        res,
+        "Payment not found",
+        null,
+        404
+      );
+
+    }
+
+    return successResponse(
+      res,
+      { payment },
+      "Fetch Data successful"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Fetch failed",
+      err.message
+    );
+
+  }
+};
+
+
+exports.updatePayment = async (req, res) => {
+
+  try {
+
+    const payment =
+      await Payment.findByPk(
+        req.params.id
+      );
+
+    if (!payment) {
+
+      return errorResponse(
+        res,
+        "Payment not found",
+        null,
+        404
+      );
+
+    }
+
+    await payment.update({
+      amount:
+        req.body.amount,
+      payment_mode:
+        req.body.payment_mode,
+      notes:
+        req.body.notes
+    });
+
+    const invoice =
+      await Invoice.findByPk(
+        payment.invoice_id
+      );
+
+    const payments =
+      await Payment.findAll({
+        where: {
+          invoice_id:
+            payment.invoice_id
+        }
+      });
+
+    const totalPaid =
+      payments.reduce(
+        (sum, item) =>
+          sum +
+          parseFloat(
+            item.amount
+          ),
+        0
+      );
+
+    const totalAmount =
+      parseFloat(
+        invoice.total_amount
+      );
+
+    const dueAmount =
+      totalAmount -
+      totalPaid;
+
+    let status =
+      "pending";
+
+    if (
+      totalPaid > 0 &&
+      dueAmount > 0
+    ) {
+      status =
+        "partial";
+    }
+
+    if (
+      dueAmount <= 0
+    ) {
+      status =
+        "paid";
+    }
+
+    await invoice.update({
+      paid_amount:
+        totalPaid,
+
+      due_amount:
+        dueAmount,
+
+      status
+    });
+
+    return successResponse(
+      res,
+      {
+        paid_amount:
+          totalPaid,
+
+        due_amount:
+          dueAmount,
+
+        status
+      },
+      "Payment updated successfully"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Update failed",
+      err.message
+    );
+
+  }
+
+};
+
+
 
 // Update Invoice 
 
