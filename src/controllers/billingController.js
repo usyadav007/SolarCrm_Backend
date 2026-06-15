@@ -30,13 +30,18 @@ exports.addPayment = async (req, res) => {
       include: [
         {
           model: Lead,
-          attributes: ["id", "customer_name"],
-          include: [
-            {
-              model: Customer,
-              attributes: ["email"]
-            }
-          ]
+        as: "Lead",
+        attributes: [
+          "id",
+          "customer_name"
+        ],
+        include: [
+          {
+            model: Customer,
+            as: "Customer",
+            attributes: [
+              "email"
+            ]
         }
       ]
     });
