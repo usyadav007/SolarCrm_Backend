@@ -129,6 +129,62 @@ exports.addPayment = async (req, res) => {
   }
 };
 
+
+
+// GET ALL PAYMENTS
+
+exports.getAllPayments = async (req, res) => {
+  try {
+
+    const data = await Payment.findAll({
+      include: [
+        {
+          model: Invoice,
+          attributes: [
+            "id",
+            "lead_id",
+            "total_amount",
+            "paid_amount",
+            "due_amount",
+            "status"
+          ],
+          include: [
+            {
+              model: Lead,
+              as: "Lead",
+              attributes: [
+                "id",
+                "customer_name",
+                "phone"
+              ]
+            }
+          ]
+        }
+      ],
+      order: [
+        ["id", "DESC"]
+      ]
+    });
+
+    return successResponse(
+      res,
+      { data },
+      "Fetch Data successful"
+    );
+
+  } catch (err) {
+
+    return errorResponse(
+      res,
+      "Fetch payment failed",
+      err.message
+    );
+
+  }
+};
+
+
+
 // Update Invoice 
 
 exports.update = async (req, res) => {

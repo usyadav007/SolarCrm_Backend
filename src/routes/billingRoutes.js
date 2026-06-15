@@ -38,6 +38,11 @@ router.post(
 );
 
 router.get(
+  "/payment",
+  controller.getAllPayments
+);
+
+router.get(
   "/payment/:invoice_id",
   controller.getPayments
 );
