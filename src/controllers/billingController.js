@@ -26,25 +26,30 @@ exports.addPayment = async (req, res) => {
     const { invoice_id, amount, payment_mode, notes } = req.body;
 
     // 🔥 STEP 1: Fetch invoice + relations
-    const invoice = await Invoice.findByPk(invoice_id, {
-      include: [
-        {
-          model: Lead,
-        as: "Lead",
-        attributes: [
-          "id",
-          "customer_name"
-        ],
+    const invoice = await Invoice.findByPk(
+      invoice_id,
+      {
         include: [
           {
-            model: Customer,
-            as: "Customer",
+            model: Lead,
+            as: "Lead",
             attributes: [
-              "email"
+              "id",
+              "customer_name"
+            ],
+            include: [
+              {
+                model: Customer,
+                as: "Customer",
+                attributes: [
+                  "email"
+                ]
+              }
             ]
-        }
-      ]
-    });
+          }
+        ]
+      }
+    );
 
     if (!invoice) {
       
