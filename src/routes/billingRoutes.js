@@ -43,6 +43,16 @@ router.get(
 );
 
 router.get(
+  "/payment/:id/details",
+  controller.getOnePayment
+);
+
+router.put(
+  "/payment/:id",
+  controller.updatePayment
+);
+
+router.get(
   "/payment/:invoice_id",
   controller.getPayments
 );
