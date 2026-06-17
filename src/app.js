@@ -5,7 +5,6 @@ const authRoutes = require("./routes/authRoutes");
 const leadRoutes = require("./routes/leadRoutes");
 const followupRoutes = require("./routes/followupRoutes");
 const roleRoutes = require("./routes/roleRoutes");
-
 const app = express();
 
 
@@ -36,6 +35,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/inventory", require("./routes/inventoryRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/customer", require("./routes/customerRoutes"));
+app.use("/api/inventory/categories", require("./routes/inventoryCategoryRoutes"));
 
 
 module.exports = app;

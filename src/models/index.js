@@ -19,6 +19,11 @@ const Otp = require("./otpModel")(sequelize, require("sequelize").DataTypes);
 const Customer = require("./customerModel")(sequelize, require("sequelize").DataTypes);
 const Role = require("./roleModel")(sequelize, require("sequelize").DataTypes);
 
+const InventoryCategory = require("./inventoryCategoryModel")(sequelize, require("sequelize").DataTypes);
+const InventoryProduct = require("./inventoryProductModel")(sequelize, require("sequelize").DataTypes);
+const InventoryTransaction = require("./inventoryTransactionModel")(sequelize, require("sequelize").DataTypes);
+  
+
 
 // ==========================================
 // LEAD HISTORY
@@ -298,6 +303,69 @@ Staff.belongsTo(Role, {
 });
 
 
+
+// ==========================================
+// INVENTORY CATEGORIES
+// ==========================================
+
+InventoryCategory.hasMany(
+  InventoryProduct,
+  {
+    foreignKey: "category_id",
+    as: "Products"
+  }
+);
+
+InventoryProduct.belongsTo(
+  InventoryCategory,
+  {
+    foreignKey: "category_id",
+    as: "Category"
+  }
+);
+
+
+// ==========================================
+// INVENTORY TRANSACTIONS
+// ==========================================
+
+InventoryProduct.hasMany(
+  InventoryTransaction,
+  {
+    foreignKey: "product_id",
+    as: "Transactions"
+  }
+);
+
+InventoryTransaction.belongsTo(
+  InventoryProduct,
+  {
+    foreignKey: "product_id",
+    as: "Product"
+  }
+);
+
+
+// ==========================================
+// INSTALLATION MATERIAL ISSUE
+// ==========================================
+
+Installation.hasMany(
+  InventoryTransaction,
+  {
+    foreignKey: "installation_id"
+  }
+);
+
+InventoryTransaction.belongsTo(
+  Installation,
+  {
+    foreignKey: "installation_id",
+    as: "Installation"
+  }
+);
+
+
 // ==========================================
 // EXPORTS
 // ==========================================
@@ -324,5 +392,8 @@ db.Inventory = Inventory;
 db.Otp = Otp;
 db.Customer = Customer;
 db.Role = Role;
+db.InventoryCategory = InventoryCategory;
+db.InventoryProduct = InventoryProduct;
+db.InventoryTransaction = InventoryTransaction;
 
 module.exports = db;
