@@ -22,6 +22,7 @@ const Role = require("./roleModel")(sequelize, require("sequelize").DataTypes);
 const InventoryCategory = require("./inventoryCategoryModel")(sequelize, require("sequelize").DataTypes);
 const InventoryProduct = require("./inventoryProductModel")(sequelize, require("sequelize").DataTypes);
 const InventoryTransaction = require("./inventoryTransactionModel")(sequelize, require("sequelize").DataTypes);
+
   
 
 
@@ -364,6 +365,8 @@ InventoryTransaction.belongsTo(
     as: "Installation"
   }
 );
+
+
 
 
 // ==========================================
