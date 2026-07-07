@@ -22,7 +22,7 @@ const Role = require("./roleModel")(sequelize, require("sequelize").DataTypes);
 const InventoryCategory = require("./inventoryCategoryModel")(sequelize, require("sequelize").DataTypes);
 const InventoryProduct = require("./inventoryProductModel")(sequelize, require("sequelize").DataTypes);
 const InventoryTransaction = require("./inventoryTransactionModel")(sequelize, require("sequelize").DataTypes);
-
+const Supplier = require("./supplierModel")(sequelize, require("sequelize").DataTypes);
   
 
 
@@ -367,6 +367,15 @@ InventoryTransaction.belongsTo(
 );
 
 
+Supplier.hasMany(Purchase,{
+  foreignKey:"supplier_id"
+});
+
+Purchase.belongsTo(Supplier,{
+  foreignKey:"supplier_id",
+  as:"Supplier"
+});
+
 
 
 // ==========================================
@@ -398,5 +407,6 @@ db.Role = Role;
 db.InventoryCategory = InventoryCategory;
 db.InventoryProduct = InventoryProduct;
 db.InventoryTransaction = InventoryTransaction;
+db.Supplier = Supplier;
 
 module.exports = db;
