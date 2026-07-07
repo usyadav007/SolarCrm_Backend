@@ -369,20 +369,6 @@ InventoryTransaction.belongsTo(
 );
 
 
-Supplier.hasMany(Purchase,{
-  foreignKey:"supplier_id"
-});
-
-Purchase.belongsTo(Supplier,{
-  foreignKey:"supplier_id",
-  as:"Supplier"
-});
-
-
-// ==========================================
-// PURCHASES
-// ==========================================
-
 Supplier.hasMany(Purchase, {
   foreignKey: "supplier_id",
 });
@@ -399,10 +385,12 @@ Purchase.hasMany(PurchaseItem, {
 
 PurchaseItem.belongsTo(Purchase, {
   foreignKey: "purchase_id",
+  as: "Purchase",
 });
 
 InventoryProduct.hasMany(PurchaseItem, {
   foreignKey: "product_id",
+  as: "PurchaseItems",
 });
 
 PurchaseItem.belongsTo(InventoryProduct, {
