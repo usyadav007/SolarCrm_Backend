@@ -23,6 +23,8 @@ const InventoryCategory = require("./inventoryCategoryModel")(sequelize, require
 const InventoryProduct = require("./inventoryProductModel")(sequelize, require("sequelize").DataTypes);
 const InventoryTransaction = require("./inventoryTransactionModel")(sequelize, require("sequelize").DataTypes);
 const Supplier = require("./supplierModel")(sequelize, require("sequelize").DataTypes);
+const Purchase = require("./purchaseModel")(sequelize, require("sequelize").DataTypes);
+const PurchaseItem = require("./purchaseItemModel")(sequelize, require("sequelize").DataTypes);
   
 
 
@@ -377,6 +379,40 @@ Purchase.belongsTo(Supplier,{
 });
 
 
+// ==========================================
+// PURCHASES
+// ==========================================
+
+Supplier.hasMany(Purchase, {
+  foreignKey: "supplier_id",
+});
+
+Purchase.belongsTo(Supplier, {
+  foreignKey: "supplier_id",
+  as: "Supplier",
+});
+
+Purchase.hasMany(PurchaseItem, {
+  foreignKey: "purchase_id",
+  as: "Items",
+});
+
+PurchaseItem.belongsTo(Purchase, {
+  foreignKey: "purchase_id",
+});
+
+InventoryProduct.hasMany(PurchaseItem, {
+  foreignKey: "product_id",
+});
+
+PurchaseItem.belongsTo(InventoryProduct, {
+  foreignKey: "product_id",
+  as: "Product",
+});
+
+
+
+
 
 // ==========================================
 // EXPORTS
@@ -408,5 +444,7 @@ db.InventoryCategory = InventoryCategory;
 db.InventoryProduct = InventoryProduct;
 db.InventoryTransaction = InventoryTransaction;
 db.Supplier = Supplier;
+db.Purchase = Purchase;
+db.PurchaseItem = PurchaseItem;
 
 module.exports = db;
