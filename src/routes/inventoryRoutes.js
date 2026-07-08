@@ -18,4 +18,5 @@ router.delete("/stock/:id", auth, controller.deleteStock);
 // History
 router.get("/history", auth, controller.getHistory);
 
+
 module.exports = router;

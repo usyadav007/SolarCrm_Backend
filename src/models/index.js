@@ -330,45 +330,8 @@ InventoryProduct.belongsTo(
 
 
 // ==========================================
-// INVENTORY TRANSACTIONS
+// PURCHASES
 // ==========================================
-
-InventoryProduct.hasMany(
-  InventoryTransaction,
-  {
-    foreignKey: "product_id",
-    as: "Transactions"
-  }
-);
-
-InventoryTransaction.belongsTo(
-  InventoryProduct,
-  {
-    foreignKey: "product_id",
-    as: "Product"
-  }
-);
-
-
-// ==========================================
-// INSTALLATION MATERIAL ISSUE
-// ==========================================
-
-Installation.hasMany(
-  InventoryTransaction,
-  {
-    foreignKey: "installation_id"
-  }
-);
-
-InventoryTransaction.belongsTo(
-  Installation,
-  {
-    foreignKey: "installation_id",
-    as: "Installation"
-  }
-);
-
 
 Supplier.hasMany(Purchase, {
   foreignKey: "supplier_id",
@@ -398,6 +361,66 @@ PurchaseItem.belongsTo(InventoryProduct, {
   foreignKey: "product_id",
   as: "Product",
 });
+
+
+// ==========================================
+// INVENTORY TRANSACTIONS
+// ==========================================
+
+InventoryProduct.hasMany(
+  InventoryTransaction,
+  {
+    foreignKey: "product_id",
+    as: "Transactions",
+  }
+);
+
+InventoryTransaction.belongsTo(
+  InventoryProduct,
+  {
+    foreignKey: "product_id",
+    as: "Product",
+  }
+);
+
+Purchase.hasMany(
+  InventoryTransaction,
+  {
+    foreignKey: "purchase_id",
+    as: "Transactions",
+  }
+);
+
+InventoryTransaction.belongsTo(
+  Purchase,
+  {
+    foreignKey: "purchase_id",
+    as: "Purchase",
+  }
+);
+
+
+
+// ==========================================
+// INSTALLATION MATERIAL ISSUE
+// ==========================================
+
+Installation.hasMany(
+  InventoryTransaction,
+  {
+    foreignKey: "installation_id",
+    as: "Transactions",
+  }
+);
+
+InventoryTransaction.belongsTo(
+  Installation,
+  {
+    foreignKey: "installation_id",
+    as: "Installation",
+  }
+);
+
 
 
 // ==========================================
