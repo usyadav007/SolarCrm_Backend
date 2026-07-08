@@ -38,6 +38,8 @@ app.use("/api/customer", require("./routes/customerRoutes"));
 app.use("/api/inventory/categories", require("./routes/inventoryCategoryRoutes"));
 app.use("/api/inventory/products", require("./routes/inventoryProductRoutes"));
 app.use("/api/suppliers", require("./routes/supplierRoutes"));
+app.use("/api/purchase",require("./routes/purchaseRoutes"));
+app.use("/api/inventory/transaction", require("./routes/inventoryTransactionRoutes"));
 
 
 module.exports = app;

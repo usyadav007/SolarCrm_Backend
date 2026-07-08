@@ -25,6 +25,7 @@ const InventoryTransaction = require("./inventoryTransactionModel")(sequelize, r
 const Supplier = require("./supplierModel")(sequelize, require("sequelize").DataTypes);
 const Purchase = require("./purchaseModel")(sequelize, require("sequelize").DataTypes);
 const PurchaseItem = require("./purchaseItemModel")(sequelize, require("sequelize").DataTypes);
+const InstallationMaterial = require("./installationMaterialModel")(sequelize,require("sequelize").DataTypes);
   
 
 
@@ -399,6 +400,70 @@ PurchaseItem.belongsTo(InventoryProduct, {
 });
 
 
+// ==========================================
+// INSTALLATION MATERIALS
+// ==========================================
+
+Installation.hasMany(
+  InstallationMaterial,
+  {
+      foreignKey:
+      "installation_id",
+      as:
+      "Materials"
+  }
+);
+
+InstallationMaterial.belongsTo(
+  Installation,
+  {
+      foreignKey:
+      "installation_id",
+      as:
+      "Installation"
+  }
+);
+
+InventoryProduct.hasMany(
+  InstallationMaterial,
+  {
+      foreignKey:
+      "product_id",
+      as:
+      "InstallationMaterials"
+  }
+);
+
+InstallationMaterial.belongsTo(
+  InventoryProduct,
+  {
+      foreignKey:
+      "product_id",
+      as:
+      "Product"
+  }
+);
+
+Staff.hasMany(
+  InstallationMaterial,
+  {
+      foreignKey:
+      "issued_by",
+      as:
+      "IssuedMaterials"
+  }
+);
+
+InstallationMaterial.belongsTo(
+  Staff,
+  {
+      foreignKey:
+      "issued_by",
+      as:
+      "IssuedBy"
+  }
+);
+
 
 
 
@@ -434,5 +499,6 @@ db.InventoryTransaction = InventoryTransaction;
 db.Supplier = Supplier;
 db.Purchase = Purchase;
 db.PurchaseItem = PurchaseItem;
+db.InstallationMaterial = InstallationMaterial;
 
 module.exports = db;
