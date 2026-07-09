@@ -119,25 +119,18 @@ const {
         // Purchase Item
   
         await PurchaseItem.create({
-  
-          purchase_id:
-            purchase.id,
-  
-          product_id:
-            item.product_id,
-  
-          quantity:
-            item.quantity,
-  
-          purchase_price:
-            item.purchase_price,
-  
-          total_price:
-            totalPrice,
-  
-        }, {
-          transaction
-        });
+
+          purchase_id: purchase.id,
+      
+          product_id: item.product_id,
+      
+          quantity: item.quantity,
+      
+          purchase_price: item.purchase_price,
+      
+          total_price: totalPrice
+      
+      }, { transaction });
   
         // Update Stock
   

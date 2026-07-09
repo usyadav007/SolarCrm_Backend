@@ -1,48 +1,50 @@
-const { DataTypes } = require("sequelize");
+module.exports = (sequelize, DataTypes) => {
 
-module.exports = (sequelize) => {
+  const Purchase = sequelize.define(
+      "Purchase",
+      {
 
-  const PurchaseItem = sequelize.define(
-    "PurchaseItem",
-    {
+          id: {
+              type: DataTypes.INTEGER,
+              primaryKey: true,
+              autoIncrement: true
+          },
 
-      id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+          supplier_id: {
+              type: DataTypes.INTEGER,
+              allowNull: false
+          },
+
+          invoice_no: {
+              type: DataTypes.STRING(100),
+              allowNull: true
+          },
+
+          purchase_date: {
+              type: DataTypes.DATEONLY,
+              allowNull: false
+          },
+
+          total_amount: {
+              type: DataTypes.DECIMAL(12,2),
+              allowNull: false,
+              defaultValue: 0
+          },
+
+          notes: {
+              type: DataTypes.TEXT,
+              allowNull: true
+          }
+
       },
-
-      purchase_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-
-      product_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-
-      quantity: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-
-      unit_price: {
-        type: DataTypes.DECIMAL(12,2),
-        allowNull: false,
-      },
-
-      total_price: {
-        type: DataTypes.DECIMAL(12,2),
-        allowNull: false,
+      {
+          tableName: "purchases",
+          timestamps: true,
+          createdAt: "created_at",
+          updatedAt: "updated_at"
       }
-
-    },
-    {
-      tableName: "purchase_items",
-      timestamps: false,
-    }
   );
 
-  return PurchaseItem;
+  return Purchase;
+
 };
