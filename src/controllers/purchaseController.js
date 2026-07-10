@@ -217,7 +217,7 @@ const {
           {
             model: Supplier,
             as: "Supplier",
-            attributes: ["id", "supplier_name", "mobile"]
+            attributes: ["id", "supplier_name", "phone"]
           },
           {
             model: PurchaseItem,
