@@ -209,158 +209,112 @@ const {
   // GET ALL PURCHASES
   // ==========================================
   
-  exports.getPurchases = async (
-    req,
-    res
-  ) => {
-  
+  exports.getPurchases = async (req, res) => {
     try {
   
-      const purchases =
-        await Purchase.findAll({
-  
-          include: [
-  
-            {
-              model: Supplier,
-              as: "Supplier",
-            },
-  
-            {
-              model: PurchaseItem,
-              as: "Items",
-            },
-  
-          ],
-  
-          order: [
-            ["id", "DESC"]
-          ],
-  
-        });
-  
-      return res.json({
-  
-        success: true,
-  
-        message:
-          "Fetch successful",
-  
-        data: {
-  
-          data: purchases,
-  
-        },
-  
+      const purchases = await Purchase.findAll({
+        include: [
+          {
+            model: Supplier,
+            as: "Supplier",
+            attributes: ["id", "supplier_name", "mobile"]
+          },
+          {
+            model: PurchaseItem,
+            as: "Items",
+            include: [
+              {
+                model: InventoryProduct,
+                as: "Product",
+                attributes: [
+                  "id",
+                  "product_name",
+                  "sku",
+                  "unit",
+                  "selling_price"
+                ]
+              }
+            ]
+          }
+        ],
+        order: [["id", "DESC"]]
       });
   
-    }
+      return res.status(200).json({
+        success: true,
+        data: purchases
+      });
   
-    catch (error) {
-  
+    } catch (error) {
       console.log(error);
   
       return res.status(500).json({
-  
         success: false,
-  
-        message:
-          error.message,
-  
+        message: error.message
       });
-  
     }
-  
   };
-
+ 
+ 
 
   // ==========================================
 // GET PURCHASE DETAILS
 // ==========================================
 
-exports.getPurchaseById = async (
-    req,
-    res
-  ) => {
-  
-    try {
-  
-      const purchase =
-        await Purchase.findByPk(
-          req.params.id,
-          {
-  
-            include: [
-  
-              {
-                model: Supplier,
-                as: "Supplier",
-              },
-  
-              {
-                model: PurchaseItem,
-                as: "Items",
-  
-                include: [
-  
-                  {
-                    model: InventoryProduct,
-                    as: "Product",
-                  },
-  
-                ],
-  
-              },
-  
-            ],
-  
-          }
-        );
-  
-      if (!purchase) {
-  
-        return res.status(404).json({
-  
-          success: false,
-  
-          message:
-            "Purchase not found",
-  
-        });
-  
-      }
-  
-      return res.json({
-  
-        success: true,
-  
-        message:
-          "Fetch successful",
-  
-        data: purchase,
-  
-      });
-  
-    }
-  
-    catch (error) {
-  
-      console.log(error);
-  
-      return res.status(500).json({
-  
+exports.getPurchaseById = async (req, res) => {
+
+  try {
+
+    const purchase = await Purchase.findByPk(req.params.id, {
+      include: [
+        {
+          model: Supplier,
+          as: "Supplier"
+        },
+        {
+          model: PurchaseItem,
+          as: "Items",
+          include: [
+            {
+              model: InventoryProduct,
+              as: "Product",
+              attributes: [
+                "id",
+                "product_name",
+                "sku",
+                "unit",
+                "purchase_price",
+                "selling_price"
+              ]
+            }
+          ]
+        }
+      ]
+    });
+
+    if (!purchase) {
+      return res.status(404).json({
         success: false,
-  
-        message:
-          error.message,
-  
+        message: "Purchase not found"
       });
-  
     }
-  
-  };
-  
-  
+
+    return res.json({
+      success: true,
+      data: purchase
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+
+};
+
   
   // ==========================================
   // UPDATE PURCHASE
