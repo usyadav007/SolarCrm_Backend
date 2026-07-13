@@ -42,4 +42,5 @@ app.use("/api/purchase",require("./routes/purchaseRoutes"));
 app.use("/api/inventory/transaction", require("./routes/inventoryTransactionRoutes"));
 
 
+
 module.exports = app;

@@ -7,6 +7,7 @@ const {
     InventoryTransaction,
   } = require("../models");
   
+  const {Op} = require("sequelize");
   
   
   // ==========================================
@@ -136,7 +137,7 @@ const {
   
         await product.update({
   
-          stock:
+          current_stock:
             Number(product.stock) +
             Number(item.quantity),
   
@@ -618,19 +619,20 @@ async (req, res) => {
     await InventoryTransaction.destroy({
 
       where: {
-
-        reference_id:
-          purchase.id,
-
-        transaction_type: [
-          "purchase",
-          "purchase_update"
-        ],
-
+    
+        reference_id: purchase.id,
+    
+        transaction_type: {
+          [Op.in]: [
+            "purchase",
+            "purchase_update"
+          ]
+        }
+    
       },
-
+    
       transaction,
-
+    
     });
 
     // ==========================================

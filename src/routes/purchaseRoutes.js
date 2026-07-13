@@ -14,39 +14,16 @@ require("../middleware/authMiddleware");
 // PURCHASE CRUD
 // ==========================================
 
-// Create Purchase
-router.post(
-  "/",
-  auth,
-  purchaseController.createPurchase
-);
+router.get("/summary", purchaseController.getPurchaseSummary);
 
-// Get All Purchases
-router.get(
-  "/",
-  auth,
-  purchaseController.getPurchases
-);
+router.get("/:id/invoice", purchaseController.printPurchaseInvoice);
 
-// Get Purchase Details
-router.get(
-  "/:id",
-  auth,
-  purchaseController.getPurchaseById
-);
+router.get("/:id", purchaseController.getPurchaseById);
 
-// Update Purchase
-router.put(
-  "/:id",
-  auth,
-  purchaseController.updatePurchase
-);
+router.post("/", purchaseController.createPurchase);
 
-// Delete Purchase
-router.delete(
-  "/:id",
-  auth,
-  purchaseController.deletePurchase
-);
+router.put("/:id", purchaseController.updatePurchase);
+
+router.delete("/:id", purchaseController.deletePurchase);
 
 module.exports = router;
