@@ -1,13 +1,13 @@
 const {
-    sequelize,
-    Purchase,
-    PurchaseItem,
-    Supplier,
-    InventoryProduct,
-    InventoryTransaction,
-  } = require("../models");
-  
-  const {Op} = require("sequelize");
+  sequelize,
+  Purchase,
+  PurchaseItem,
+  Supplier,
+  InventoryProduct,
+  InventoryTransaction
+} = require("../models");
+
+const { Op } = require("sequelize");
   
   
   // ==========================================
@@ -15,338 +15,10 @@ const {
   // ==========================================
   
   exports.createPurchase = async (req, res) => {
-  
-    const transaction =
-      await sequelize.transaction();
-  
-    try {
-  
-      const {
-        supplier_id,
-        invoice_no,
-        purchase_date,
-        total_amount,
-        notes,
-        items,
-      } = req.body;
-  
-      // ============================
-      // VALIDATION
-      // ============================
-  
-      if (
-        !supplier_id ||
-        !purchase_date ||
-        !items ||
-        items.length === 0
-      ) {
-  
-        await transaction.rollback();
-  
-        return res.status(400).json({
-  
-          success: false,
-          message:
-            "Supplier, Purchase Date and Items are required.",
-  
-        });
-  
-      }
-  
-      // ============================
-      // CHECK SUPPLIER
-      // ============================
-  
-      const supplier =
-        await Supplier.findByPk(
-          supplier_id
-        );
-  
-      if (!supplier) {
-  
-        await transaction.rollback();
-  
-        return res.status(404).json({
-  
-          success: false,
-          message:
-            "Supplier not found",
-  
-        });
-  
-      }
-  
-      // ============================
-      // CREATE PURCHASE
-      // ============================
-  
-      const purchase =
-        await Purchase.create({
-  
-          supplier_id,
-          invoice_no,
-          purchase_date,
-          total_amount,
-          notes,
-  
-        }, {
-          transaction
-        });
-  
-      // ============================
-      // SAVE ITEMS
-      // ============================
-  
-      for (const item of items) {
-  
-        const product =
-          await InventoryProduct.findByPk(
-            item.product_id,
-            { transaction }
-          );
-  
-        if (!product) {
-  
-          throw new Error(
-            `Product ID ${item.product_id} not found`
-          );
-  
-        }
-  
-        const totalPrice =
-          Number(item.quantity) *
-          Number(item.purchase_price);
-  
-        // Purchase Item
-  
-        await PurchaseItem.create({
-
-          purchase_id: purchase.id,
-      
-          product_id: item.product_id,
-      
-          quantity: item.quantity,
-      
-          purchase_price: item.purchase_price,
-      
-          total_price: totalPrice
-      
-      }, { transaction });
-  
-        // Update Stock
-  
-        await product.update({
-  
-          current_stock:
-            Number(product.stock) +
-            Number(item.quantity),
-  
-        }, {
-          transaction
-        });
-  
-        // Inventory Transaction
-  
-        await InventoryTransaction.create({
-  
-          product_id:
-            item.product_id,
-  
-          transaction_type:
-            "purchase",
-  
-          quantity:
-            item.quantity,
-  
-          reference_id:
-            purchase.id,
-  
-          remarks:
-            `Purchase Invoice ${invoice_no}`,
-  
-        }, {
-          transaction
-        });
-  
-      }
-  
-      await transaction.commit();
-  
-      return res.status(201).json({
-  
-        success: true,
-  
-        message:
-          "Purchase created successfully",
-  
-        data: purchase,
-  
-      });
-  
-    }
-  
-    catch (error) {
-  
-      await transaction.rollback();
-  
-      console.log(error);
-  
-      return res.status(500).json({
-  
-        success: false,
-  
-        message:
-          error.message,
-  
-      });
-  
-    }
-  
-  };
-  
-  
-  
-  // ==========================================
-  // GET ALL PURCHASES
-  // ==========================================
-  
-  exports.getPurchases = async (req, res) => {
-    try {
-  
-      const purchases = await Purchase.findAll({
-        include: [
-          {
-            model: Supplier,
-            as: "Supplier",
-            attributes: ["id", "supplier_name", "phone"]
-          },
-          {
-            model: PurchaseItem,
-            as: "Items",
-            include: [
-              {
-                model: InventoryProduct,
-                as: "Product",
-                attributes: [
-                  "id",
-                  "product_name",
-                  "sku",
-                  "unit",
-                  "selling_price"
-                ]
-              }
-            ]
-          }
-        ],
-        order: [["id", "DESC"]]
-      });
-  
-      return res.status(200).json({
-        success: true,
-        data: purchases
-      });
-  
-    } catch (error) {
-      console.log(error);
-  
-      return res.status(500).json({
-        success: false,
-        message: error.message
-      });
-    }
-  };
- 
- 
-
-  // ==========================================
-// GET PURCHASE DETAILS
-// ==========================================
-
-exports.getPurchaseById = async (req, res) => {
-
-  try {
-
-    const purchase = await Purchase.findByPk(req.params.id, {
-      include: [
-        {
-          model: Supplier,
-          as: "Supplier"
-        },
-        {
-          model: PurchaseItem,
-          as: "Items",
-          include: [
-            {
-              model: InventoryProduct,
-              as: "Product",
-              attributes: [
-                "id",
-                "product_name",
-                "sku",
-                "unit",
-                "purchase_price",
-                "selling_price"
-              ]
-            }
-          ]
-        }
-      ]
-    });
-
-    if (!purchase) {
-      return res.status(404).json({
-        success: false,
-        message: "Purchase not found"
-      });
-    }
-
-    return res.json({
-      success: true,
-      data: purchase
-    });
-
-  } catch (error) {
-
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-
-  }
-
-};
-
-  
-  // ==========================================
-  // UPDATE PURCHASE
-  // ==========================================
-  
-  exports.updatePurchase = async (req, res) => {
 
     const transaction = await sequelize.transaction();
 
     try {
-
-        const purchase = await Purchase.findByPk(req.params.id, {
-            include: [
-                {
-                    model: PurchaseItem,
-                    as: "Items"
-                }
-            ],
-            transaction
-        });
-
-        if (!purchase) {
-
-            await transaction.rollback();
-
-            return res.status(404).json({
-                success: false,
-                message: "Purchase not found"
-            });
-
-        }
 
         const {
             supplier_id,
@@ -357,74 +29,31 @@ exports.getPurchaseById = async (req, res) => {
             items
         } = req.body;
 
-        if (!items || items.length === 0) {
+        if (!supplier_id || !purchase_date || !items || items.length === 0) {
 
             await transaction.rollback();
 
             return res.status(400).json({
                 success: false,
-                message: "Items are required"
+                message: "Supplier, Purchase Date and Items are required."
             });
 
         }
 
-        // ==============================
-        // REVERSE OLD STOCK
-        // ==============================
+        const supplier = await Supplier.findByPk(supplier_id);
 
-        for (const item of purchase.Items) {
+        if (!supplier) {
 
-            const product = await InventoryProduct.findByPk(
-                item.product_id,
-                { transaction }
-            );
+            await transaction.rollback();
 
-            if (product) {
-
-                await product.update({
-                    current_stock:
-                        Number(product.current_stock) -
-                        Number(item.quantity)
-                }, { transaction });
-
-            }
+            return res.status(404).json({
+                success: false,
+                message: "Supplier not found"
+            });
 
         }
 
-        // ==============================
-        // DELETE OLD PURCHASE ITEMS
-        // ==============================
-
-        await PurchaseItem.destroy({
-
-            where: {
-                purchase_id: purchase.id
-            },
-
-            transaction
-
-        });
-
-        // ==============================
-        // DELETE OLD INVENTORY TRANSACTIONS
-        // ==============================
-
-        await InventoryTransaction.destroy({
-
-            where: {
-                reference_id: purchase.id,
-                transaction_type: "purchase"
-            },
-
-            transaction
-
-        });
-
-        // ==============================
-        // UPDATE PURCHASE
-        // ==============================
-
-        await purchase.update({
+        const purchase = await Purchase.create({
 
             supplier_id,
             invoice_no,
@@ -434,9 +63,6 @@ exports.getPurchaseById = async (req, res) => {
 
         }, { transaction });
 
-        // ==============================
-        // SAVE NEW ITEMS
-        // ==============================
 
         for (const item of items) {
 
@@ -457,25 +83,16 @@ exports.getPurchaseById = async (req, res) => {
                 Number(item.quantity) *
                 Number(item.purchase_price);
 
-            // Purchase Item
-
             await PurchaseItem.create({
 
                 purchase_id: purchase.id,
-
                 product_id: item.product_id,
-
                 quantity: item.quantity,
-
                 purchase_price: item.purchase_price,
-
                 total_price: totalPrice
 
             }, { transaction });
 
-            // ==============================
-            // UPDATE STOCK
-            // ==============================
 
             await product.update({
 
@@ -488,22 +105,14 @@ exports.getPurchaseById = async (req, res) => {
 
             }, { transaction });
 
-            // ==============================
-            // INVENTORY TRANSACTION
-            // ==============================
 
             await InventoryTransaction.create({
 
                 product_id: item.product_id,
-
                 transaction_type: "purchase",
-
                 quantity: item.quantity,
-
                 reference_id: purchase.id,
-
-                remarks:
-                    `Purchase Updated (${invoice_no})`
+                remarks: `Purchase Invoice ${invoice_no}`
 
             }, { transaction });
 
@@ -511,17 +120,16 @@ exports.getPurchaseById = async (req, res) => {
 
         await transaction.commit();
 
-        return res.status(200).json({
+        return res.status(201).json({
 
             success: true,
-
-            message: "Purchase updated successfully",
-
+            message: "Purchase created successfully",
             data: purchase
 
         });
 
     }
+
     catch (error) {
 
         await transaction.rollback();
@@ -531,7 +139,6 @@ exports.getPurchaseById = async (req, res) => {
         return res.status(500).json({
 
             success: false,
-
             message: error.message
 
         });
@@ -539,227 +146,102 @@ exports.getPurchaseById = async (req, res) => {
     }
 
 };
-
+  
+  
+  
   // ==========================================
-// DELETE PURCHASE
-// ==========================================
+  // GET ALL PURCHASES
+  // ==========================================
+  
+  exports.getPurchases = async (req, res) => {
 
-exports.deletePurchase =
-async (req, res) => {
+    try {
 
-  const transaction =
-    await sequelize.transaction();
+        const purchases = await Purchase.findAll({
 
-  try {
+            include: [
 
-    const purchase =
-      await Purchase.findByPk(
-        req.params.id,
-        {
+                {
 
-          include: [
-            {
-              model: PurchaseItem,
-              as: "Items",
-            },
-          ],
+                    model: Supplier,
 
-          transaction,
+                    as: "Supplier",
 
-        }
-      );
+                    attributes: [
+                        "id",
+                        "supplier_name",
+                        "phone"
+                    ]
 
-    if (!purchase) {
+                },
 
-      await transaction.rollback();
+                {
 
-      return res.status(404).json({
+                    model: PurchaseItem,
 
-        success: false,
+                    as: "Items",
 
-        message:
-          "Purchase not found",
+                    include: [
 
-      });
+                        {
+
+                            model: InventoryProduct,
+
+                            as: "Product",
+
+                            attributes: [
+
+                                "id",
+                                "product_name",
+                                "sku",
+                                "unit",
+                                "purchase_price",
+                                "selling_price"
+
+                            ]
+
+                        }
+
+                    ]
+
+                }
+
+            ],
+
+            order: [["id", "DESC"]]
+
+        });
+
+        return res.status(200).json({
+
+            success: true,
+            data: purchases
+
+        });
 
     }
 
-    // ==========================================
-    // REVERSE STOCK
-    // ==========================================
+    catch (error) {
 
-    for (const item of purchase.Items) {
+        console.log(error);
 
-      const product =
-        await InventoryProduct.findByPk(
-          item.product_id,
-          { transaction }
-        );
-
-      if (product) {
-
-        await product.update({
-
-          stock:
-            Number(product.stock) -
-            Number(item.quantity),
-
-        }, {
-          transaction
-        });
-
-      }
-
-    }
-
-    // ==========================================
-    // DELETE INVENTORY TRANSACTIONS
-    // ==========================================
-
-    await InventoryTransaction.destroy({
-
-      where: {
-    
-        reference_id: purchase.id,
-    
-        transaction_type: {
-          [Op.in]: [
-            "purchase",
-            "purchase_update"
-          ]
-        }
-    
-      },
-    
-      transaction,
-    
-    });
-
-    // ==========================================
-    // DELETE PURCHASE ITEMS
-    // ==========================================
-
-    await PurchaseItem.destroy({
-
-      where: {
-
-        purchase_id:
-          purchase.id,
-
-      },
-
-      transaction,
-
-    });
-
-
-    exports.getPurchaseSummary = async (req, res) => {
-      try {
-    
-        const totalPurchases = await Purchase.count();
-    
-        const totalAmount = await Purchase.sum("total_amount");
-    
-        const recentPurchases = await Purchase.findAll({
-          limit: 5,
-          order: [["id", "DESC"]],
-          include: [{
-            model: Supplier,
-            as: "Supplier",
-            attributes: ["id", "name"]
-          }]
-        });
-    
-        return res.json({
-          success: true,
-          data: {
-            total_purchases: totalPurchases,
-            total_amount: totalAmount || 0,
-            recent_purchases: recentPurchases
-          }
-        });
-    
-      } catch (error) {
-    
         return res.status(500).json({
-          success: false,
-          message: error.message
+
+            success: false,
+            message: error.message
+
         });
-    
-      }
-    };
-    
 
-// ==========================================
-// PURCHASE SUMMARY
-// ==========================================
-
-exports.getPurchaseSummary = async (req, res) => {
-
-  try {
-
-      const totalPurchases = await Purchase.count();
-
-      const totalAmount = await Purchase.sum("total_amount");
-
-      const recentPurchases = await Purchase.findAll({
-
-          limit: 5,
-
-          order: [["id", "DESC"]],
-
-          include: [
-
-              {
-                  model: Supplier,
-                  as: "Supplier",
-                  attributes: ["id", "name", "mobile"]
-              }
-
-          ]
-
-      });
-
-      return res.status(200).json({
-
-          success: true,
-
-          data: {
-
-              total_purchases: totalPurchases,
-
-              total_amount: totalAmount || 0,
-
-              recent_purchases: recentPurchases
-
-          }
-
-      });
-
-  }
-
-  catch (error) {
-
-      console.log(error);
-
-      return res.status(500).json({
-
-          success: false,
-
-          message: error.message
-
-      });
-
-  }
+    }
 
 };
-
-
+ 
+ 
 // ==========================================
-// PURCHASE INVOICE
+// GET PURCHASE DETAILS
 // ==========================================
 
-exports.printPurchaseInvoice = async (req, res) => {
+exports.getPurchaseById = async (req, res) => {
 
   try {
 
@@ -768,34 +250,30 @@ exports.printPurchaseInvoice = async (req, res) => {
           include: [
 
               {
-
                   model: Supplier,
-
                   as: "Supplier"
-
               },
 
               {
-
                   model: PurchaseItem,
-
                   as: "Items",
 
                   include: [
 
                       {
-
                           model: InventoryProduct,
-
                           as: "Product",
 
                           attributes: [
+
                               "id",
                               "product_name",
-                              "product_code",
+                              "sku",
                               "unit",
                               "purchase_price",
-                              "selling_price"
+                              "selling_price",
+                              "current_stock"
+
                           ]
 
                       }
@@ -813,7 +291,6 @@ exports.printPurchaseInvoice = async (req, res) => {
           return res.status(404).json({
 
               success: false,
-
               message: "Purchase not found"
 
           });
@@ -823,6 +300,270 @@ exports.printPurchaseInvoice = async (req, res) => {
       return res.status(200).json({
 
           success: true,
+          data: purchase
+
+      });
+
+  }
+
+  catch (error) {
+
+      console.log(error);
+
+      return res.status(500).json({
+
+          success: false,
+          message: error.message
+
+      });
+
+  }
+
+};
+
+  // ==========================================
+// UPDATE PURCHASE
+// ==========================================
+
+exports.updatePurchase = async (req, res) => {
+
+  const transaction = await sequelize.transaction();
+
+  try {
+
+      const purchase = await Purchase.findByPk(req.params.id, {
+
+          include: [
+
+              {
+
+                  model: PurchaseItem,
+                  as: "Items"
+
+              }
+
+          ],
+
+          transaction
+
+      });
+
+      if (!purchase) {
+
+          await transaction.rollback();
+
+          return res.status(404).json({
+
+              success: false,
+              message: "Purchase not found"
+
+          });
+
+      }
+
+      const {
+
+          supplier_id,
+          invoice_no,
+          purchase_date,
+          total_amount,
+          notes,
+          items
+
+      } = req.body;
+
+      if (!items || items.length === 0) {
+
+          await transaction.rollback();
+
+          return res.status(400).json({
+
+              success: false,
+              message: "Items are required"
+
+          });
+
+      }
+
+      // ==========================================
+      // Reverse Old Stock
+      // ==========================================
+
+      for (const item of purchase.Items) {
+
+          const product = await InventoryProduct.findByPk(
+
+              item.product_id,
+
+              { transaction }
+
+          );
+
+          if (product) {
+
+              await product.update({
+
+                  current_stock:
+
+                      Number(product.current_stock) -
+
+                      Number(item.quantity)
+
+              }, {
+
+                  transaction
+
+              });
+
+          }
+
+      }
+
+      // ==========================================
+      // Delete Old Purchase Items
+      // ==========================================
+
+      await PurchaseItem.destroy({
+
+          where: {
+
+              purchase_id: purchase.id
+
+          },
+
+          transaction
+
+      });
+
+      // ==========================================
+      // Delete Old Inventory Transaction
+      // ==========================================
+
+      await InventoryTransaction.destroy({
+
+          where: {
+
+              reference_id: purchase.id,
+
+              transaction_type: "purchase"
+
+          },
+
+          transaction
+
+      });
+
+      // ==========================================
+      // Update Purchase
+      // ==========================================
+
+      await purchase.update({
+
+          supplier_id,
+          invoice_no,
+          purchase_date,
+          total_amount,
+          notes
+
+      }, {
+
+          transaction
+
+      });
+
+      // ==========================================
+      // Save New Purchase Items
+      // ==========================================
+
+      for (const item of items) {
+
+          const product = await InventoryProduct.findByPk(
+
+              item.product_id,
+
+              { transaction }
+
+          );
+
+          if (!product) {
+
+              throw new Error(
+
+                  `Product ID ${item.product_id} not found`
+
+              );
+
+          }
+
+          const totalPrice =
+
+              Number(item.quantity) *
+
+              Number(item.purchase_price);
+
+          await PurchaseItem.create({
+
+              purchase_id: purchase.id,
+
+              product_id: item.product_id,
+
+              quantity: item.quantity,
+
+              purchase_price: item.purchase_price,
+
+              total_price: totalPrice
+
+          }, {
+
+              transaction
+
+          });
+
+          await product.update({
+
+              current_stock:
+
+                  Number(product.current_stock) +
+
+                  Number(item.quantity),
+
+              purchase_price:
+
+                  item.purchase_price
+
+          }, {
+
+              transaction
+
+          });
+
+          await InventoryTransaction.create({
+
+              product_id: item.product_id,
+
+              transaction_type: "purchase",
+
+              quantity: item.quantity,
+
+              reference_id: purchase.id,
+
+              remarks: `Purchase Updated (${invoice_no})`
+
+          }, {
+
+              transaction
+
+          });
+
+      }
+
+      await transaction.commit();
+
+      return res.status(200).json({
+
+          success: true,
+
+          message: "Purchase updated successfully",
 
           data: purchase
 
@@ -831,6 +572,8 @@ exports.printPurchaseInvoice = async (req, res) => {
   }
 
   catch (error) {
+
+      await transaction.rollback();
 
       console.log(error);
 
@@ -845,48 +588,340 @@ exports.printPurchaseInvoice = async (req, res) => {
   }
 
 };
+// ==========================================
+// DELETE PURCHASE
+// ==========================================
 
+exports.deletePurchase = async (req, res) => {
 
+  const transaction = await sequelize.transaction();
 
+  try {
 
+      const purchase = await Purchase.findByPk(req.params.id, {
 
-    // ==========================================
-    // DELETE PURCHASE
-    // ==========================================
+          include: [
 
-    await purchase.destroy({
+              {
+                  model: PurchaseItem,
+                  as: "Items"
+              }
 
-      transaction,
+          ],
 
-    });
+          transaction
 
-    await transaction.commit();
+      });
 
-    return res.json({
+      if (!purchase) {
 
-      success: true,
+          await transaction.rollback();
 
-      message:
-        "Purchase deleted successfully",
+          return res.status(404).json({
 
-    });
+              success: false,
+              message: "Purchase not found"
+
+          });
+
+      }
+
+      // ==========================================
+      // REVERSE STOCK
+      // ==========================================
+
+      for (const item of purchase.Items) {
+
+          const product = await InventoryProduct.findByPk(
+
+              item.product_id,
+
+              { transaction }
+
+          );
+
+          if (product) {
+
+              await product.update({
+
+                  current_stock:
+
+                      Number(product.current_stock) -
+
+                      Number(item.quantity)
+
+              }, {
+
+                  transaction
+
+              });
+
+          }
+
+      }
+
+      // ==========================================
+      // DELETE INVENTORY TRANSACTIONS
+      // ==========================================
+
+      await InventoryTransaction.destroy({
+
+          where: {
+
+              reference_id: purchase.id,
+
+              transaction_type: {
+
+                  [Op.in]: [
+
+                      "purchase",
+                      "purchase_update"
+
+                  ]
+
+              }
+
+          },
+
+          transaction
+
+      });
+
+      // ==========================================
+      // DELETE PURCHASE ITEMS
+      // ==========================================
+
+      await PurchaseItem.destroy({
+
+          where: {
+
+              purchase_id: purchase.id
+
+          },
+
+          transaction
+
+      });
+
+      // ==========================================
+      // DELETE PURCHASE
+      // ==========================================
+
+      await purchase.destroy({
+
+          transaction
+
+      });
+
+      await transaction.commit();
+
+      return res.status(200).json({
+
+          success: true,
+
+          message: "Purchase deleted successfully"
+
+      });
 
   }
 
   catch (error) {
 
-    await transaction.rollback();
+      await transaction.rollback();
 
-    console.log(error);
+      console.log(error);
 
-    return res.status(500).json({
+      return res.status(500).json({
 
-      success: false,
+          success: false,
 
-      message:
-        error.message,
+          message: error.message
 
-    });
+      });
+
+  }
+
+};
+    
+// ==========================================
+// PURCHASE SUMMARY
+// ==========================================
+
+exports.getPurchaseSummary = async (req, res) => {
+
+  try {
+
+      const totalPurchases = await Purchase.count();
+
+      const totalAmount = await Purchase.sum("total_amount");
+
+      const todayPurchases = await Purchase.count({
+
+          where: {
+
+              purchase_date: new Date().toISOString().slice(0,10)
+
+          }
+
+      });
+
+      const recentPurchases = await Purchase.findAll({
+
+          limit: 5,
+
+          order: [["id","DESC"]],
+
+          include: [
+
+              {
+
+                  model: Supplier,
+
+                  as: "Supplier",
+
+                  attributes: [
+
+                      "id",
+                      "supplier_name",
+                      "phone"
+
+                  ]
+
+              }
+
+          ]
+
+      });
+
+      return res.status(200).json({
+
+          success: true,
+
+          data: {
+
+              total_purchases: totalPurchases,
+
+              total_amount: totalAmount || 0,
+
+              today_purchases: todayPurchases,
+
+              recent_purchases: recentPurchases
+
+          }
+
+      });
+
+  }
+
+  catch(error){
+
+      console.log(error);
+
+      return res.status(500).json({
+
+          success:false,
+
+          message:error.message
+
+      });
+
+  }
+
+};
+
+// ==========================================
+// PURCHASE INVOICE
+// ==========================================
+
+exports.printPurchaseInvoice = async (req,res)=>{
+
+  try{
+
+      const purchase=await Purchase.findByPk(req.params.id,{
+
+          include:[
+
+              {
+
+                  model:Supplier,
+
+                  as:"Supplier"
+
+              },
+
+              {
+
+                  model:PurchaseItem,
+
+                  as:"Items",
+
+                  include:[
+
+                      {
+
+                          model:InventoryProduct,
+
+                          as:"Product",
+
+                          attributes:[
+
+                              "id",
+
+                              "product_name",
+
+                              "sku",
+
+                              "unit",
+
+                              "purchase_price",
+
+                              "selling_price"
+
+                          ]
+
+                      }
+
+                  ]
+
+              }
+
+          ]
+
+      });
+
+      if(!purchase){
+
+          return res.status(404).json({
+
+              success:false,
+
+              message:"Purchase not found"
+
+          });
+
+      }
+
+      return res.status(200).json({
+
+          success:true,
+
+          data:purchase
+
+      });
+
+  }
+
+  catch(error){
+
+      console.log(error);
+
+      return res.status(500).json({
+
+          success:false,
+
+          message:error.message
+
+      });
 
   }
 
