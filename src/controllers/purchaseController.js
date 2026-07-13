@@ -653,157 +653,198 @@ async (req, res) => {
     });
 
 
-
-
-    exports.printPurchaseInvoice = async (req, res) => {
-
+    exports.getPurchaseSummary = async (req, res) => {
       try {
-  
-          const purchase = await Purchase.findByPk(req.params.id, {
-  
-              include: [
-  
-                  {
-                      model: Supplier,
-                      as: "Supplier"
-                  },
-  
-                  {
-                      model: PurchaseItem,
-                      as: "Items",
-  
-                      include: [
-  
-                          {
-                              model: InventoryProduct,
-                              as: "Product",
-                              attributes: [
-                                  "id",
-                                  "product_name",
-                                  "product_code",
-                                  "unit"
-                              ]
-                          }
-  
-                      ]
-  
-                  }
-  
-              ]
-  
-          });
-  
-          if (!purchase) {
-  
-              return res.status(404).json({
-  
-                  success: false,
-  
-                  message: "Purchase not found"
-  
-              });
-  
-          }
-  
-          return res.status(200).json({
-  
-              success: true,
-  
-              data: purchase
-  
-          });
-  
-      }
-  
-      catch (error) {
-  
-          console.log(error);
-  
-          return res.status(500).json({
-  
-              success: false,
-  
-              message: error.message
-  
-          });
-  
-      }
-  
-  };
-
-
-
-
-  exports.getPurchaseSummary = async (req, res) => {
-
-    try {
-
+    
         const totalPurchases = await Purchase.count();
-
+    
         const totalAmount = await Purchase.sum("total_amount");
-
-        const today = new Date();
-
-        today.setHours(0, 0, 0, 0);
-
-        const todayPurchase = await Purchase.sum("total_amount", {
-            where: {
-                purchase_date: today
-            }
-        });
-
+    
         const recentPurchases = await Purchase.findAll({
-
-            limit: 5,
-
-            order: [["id", "DESC"]],
-
-            include: [
-                {
-                    model: Supplier,
-                    as: "Supplier",
-                    attributes: ["id", "name"]
-                }
-            ]
-
+          limit: 5,
+          order: [["id", "DESC"]],
+          include: [{
+            model: Supplier,
+            as: "Supplier",
+            attributes: ["id", "name"]
+          }]
         });
-
-        return res.status(200).json({
-
-            success: true,
-
-            data: {
-
-                total_purchases: totalPurchases,
-
-                total_amount: totalAmount || 0,
-
-                today_purchase: todayPurchase || 0,
-
-                recent_purchases: recentPurchases
-
-            }
-
+    
+        return res.json({
+          success: true,
+          data: {
+            total_purchases: totalPurchases,
+            total_amount: totalAmount || 0,
+            recent_purchases: recentPurchases
+          }
         });
-
-    }
-
-    catch (error) {
-
-        console.log(error);
-
+    
+      } catch (error) {
+    
         return res.status(500).json({
-
-            success: false,
-
-            message: error.message
-
+          success: false,
+          message: error.message
         });
+    
+      }
+    };
+    
 
-    }
+// ==========================================
+// PURCHASE SUMMARY
+// ==========================================
+
+exports.getPurchaseSummary = async (req, res) => {
+
+  try {
+
+      const totalPurchases = await Purchase.count();
+
+      const totalAmount = await Purchase.sum("total_amount");
+
+      const recentPurchases = await Purchase.findAll({
+
+          limit: 5,
+
+          order: [["id", "DESC"]],
+
+          include: [
+
+              {
+                  model: Supplier,
+                  as: "Supplier",
+                  attributes: ["id", "name", "mobile"]
+              }
+
+          ]
+
+      });
+
+      return res.status(200).json({
+
+          success: true,
+
+          data: {
+
+              total_purchases: totalPurchases,
+
+              total_amount: totalAmount || 0,
+
+              recent_purchases: recentPurchases
+
+          }
+
+      });
+
+  }
+
+  catch (error) {
+
+      console.log(error);
+
+      return res.status(500).json({
+
+          success: false,
+
+          message: error.message
+
+      });
+
+  }
 
 };
 
+
+// ==========================================
+// PURCHASE INVOICE
+// ==========================================
+
+exports.printPurchaseInvoice = async (req, res) => {
+
+  try {
+
+      const purchase = await Purchase.findByPk(req.params.id, {
+
+          include: [
+
+              {
+
+                  model: Supplier,
+
+                  as: "Supplier"
+
+              },
+
+              {
+
+                  model: PurchaseItem,
+
+                  as: "Items",
+
+                  include: [
+
+                      {
+
+                          model: InventoryProduct,
+
+                          as: "Product",
+
+                          attributes: [
+                              "id",
+                              "product_name",
+                              "product_code",
+                              "unit",
+                              "purchase_price",
+                              "selling_price"
+                          ]
+
+                      }
+
+                  ]
+
+              }
+
+          ]
+
+      });
+
+      if (!purchase) {
+
+          return res.status(404).json({
+
+              success: false,
+
+              message: "Purchase not found"
+
+          });
+
+      }
+
+      return res.status(200).json({
+
+          success: true,
+
+          data: purchase
+
+      });
+
+  }
+
+  catch (error) {
+
+      console.log(error);
+
+      return res.status(500).json({
+
+          success: false,
+
+          message: error.message
+
+      });
+
+  }
+
+};
 
 
 
